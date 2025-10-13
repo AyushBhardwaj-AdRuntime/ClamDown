@@ -5,7 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Smile, Search, Phone, TrendingUp, Calendar } from "lucide-react";
+import { Smile, Search, Phone, TrendingUp, Calendar, Bot } from "lucide-react";
 import { Link } from "react-router-dom";
 import { MotivationalQuote } from "@/components/MotivationalQuote";
 import { DailyTip } from "@/components/DailyTip";
@@ -137,6 +137,21 @@ const Dashboard = () => {
                 <CardContent>
                   <Link to="/progress">
                     <Button variant="outline" className="w-full">View Progress</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow border-purple-200 bg-purple-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-purple-800">
+                    <Bot className="h-5 w-5" />
+                    AI Guidance
+                  </CardTitle>
+                  <CardDescription className="text-purple-600">Get personalized support</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/ai-guidance">
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700">Ask AI Assistant</Button>
                   </Link>
                 </CardContent>
               </Card>

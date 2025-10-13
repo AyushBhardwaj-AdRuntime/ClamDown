@@ -87,6 +87,7 @@ export const AppointmentBookingModal = ({ isOpen, onClose, clinic, onSuccess }: 
     setIsLoadingSlots(true);
     
     // For demo purposes, show all time slots as available
+    // In a real implementation, you would query the appointments table
     setTimeout(() => {
       setAvailableSlots(timeSlots);
       setIsLoadingSlots(false);
@@ -111,6 +112,7 @@ export const AppointmentBookingModal = ({ isOpen, onClose, clinic, onSuccess }: 
 
     try {
       // For demo purposes, simulate successful booking
+      // In a real implementation, you would insert into the appointments table
       const receipt = {
         appointmentId: "APPT-" + Date.now(),
         clinicName: clinic.name,

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Bot, Sparkles } from "lucide-react";
 
 interface MoodTrackingModalProps {
   isOpen: boolean;
@@ -16,9 +17,10 @@ interface MoodTrackingModalProps {
     color: string;
   };
   onSuccess: () => void;
+  onAIGuidance?: () => void;
 }
 
-const MoodTrackingModal = ({ isOpen, onClose, selectedMood, onSuccess }: MoodTrackingModalProps) => {
+const MoodTrackingModal = ({ isOpen, onClose, selectedMood, onSuccess, onAIGuidance }: MoodTrackingModalProps) => {
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -82,11 +84,26 @@ const MoodTrackingModal = ({ isOpen, onClose, selectedMood, onSuccess }: MoodTra
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
+            {(selectedMood.mood === 'stressed' || selectedMood.mood === 'anxious' || selectedMood.mood === 'sad' || selectedMood.mood === 'angry') && onAIGuidance && (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  onClose();
+                  onAIGuidance();
+                }}
+                className="flex-1 sm:flex-none"
+              >
+                <Bot className="mr-2 h-4 w-4" />
+                Get AI Help
+              </Button>
+            )}
+            <Button variant="outline" onClick={handleCancel} disabled={isSubmitting} className="flex-1 sm:flex-none">
+              Cancel
+            </Button>
+          </div>
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full sm:w-auto">
             {isSubmitting ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>

@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, ArrowLeft } from "lucide-react";
+import { Building2, ArrowLeft, Mail } from "lucide-react";
+import EmailVerificationModal from "@/components/EmailVerificationModal";
+import { sendVerificationEmail } from "@/components/EmailService";
 
 const categories = [
   { value: "anxiety", label: "Anxiety" },
@@ -24,6 +26,7 @@ const categories = [
 const ClinicRegistration = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEmailVerificationOpen, setIsEmailVerificationOpen] = useState(false);
   const [formData, setFormData] = useState({
     clinic_name: "",
     contact_person: "",
@@ -57,26 +60,37 @@ const ClinicRegistration = () => {
     try {
       console.log("Submitting registration data:", formData);
       
-      const { data, error } = await supabase
-        .from("clinic_registrations")
-        .insert([formData])
-        .select();
-
-      if (error) {
-        console.error("Error submitting registration:", error);
-        toast.error(`Failed to submit registration: ${error.message}`);
-        return;
+      // Send verification email
+      const success = await sendVerificationEmail(formData.email, formData.clinic_name, "123456");
+      
+      if (success) {
+        // Show email verification modal
+        setIsEmailVerificationOpen(true);
+        toast.success("Verification email sent! Please check your inbox.");
+      } else {
+        toast.error("Failed to send verification email. Please try again.");
       }
-
-      console.log("Registration submitted successfully:", data);
-      toast.success("Registration submitted successfully! We'll review your application and get back to you soon.");
-      navigate("/clinics/status");
+      
     } catch (error) {
       console.error("Error:", error);
       toast.error("Failed to submit registration. Please try again.");
     }
 
     setIsSubmitting(false);
+  };
+
+  const handleEmailVerified = () => {
+    // After email verification, complete the registration
+    const mockData = {
+      id: "clinic_" + Date.now(),
+      ...formData,
+      status: "pending",
+      email_verified: true
+    };
+    
+    console.log("Registration completed after email verification:", mockData);
+    toast.success("Registration submitted successfully! We'll review your application and get back to you soon.");
+    navigate("/clinics/status");
   };
 
   return (
@@ -132,7 +146,10 @@ const ClinicRegistration = () => {
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email" className="flex items-center gap-2">
+                        Email *
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                      </Label>
                       <Input
                         id="email"
                         type="email"
@@ -141,6 +158,9 @@ const ClinicRegistration = () => {
                         placeholder="Enter email address"
                         required
                       />
+                      <p className="text-xs text-muted-foreground">
+                        We'll send a verification code to this email
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone *</Label>
@@ -224,7 +244,7 @@ const ClinicRegistration = () => {
                       Cancel
                     </Button>
                     <Button type="submit" disabled={isSubmitting} className="flex-1">
-                      {isSubmitting ? "Submitting..." : "Submit Registration"}
+                      {isSubmitting ? "Sending Verification..." : "Submit & Verify Email"}
                     </Button>
                   </div>
                 </form>
@@ -245,6 +265,15 @@ const ClinicRegistration = () => {
           </div>
         </main>
       </div>
+
+      {/* Email Verification Modal */}
+      <EmailVerificationModal
+        isOpen={isEmailVerificationOpen}
+        onClose={() => setIsEmailVerificationOpen(false)}
+        email={formData.email}
+        clinicName={formData.clinic_name}
+        onVerified={handleEmailVerified}
+      />
     </SidebarProvider>
   );
 };

@@ -27,6 +27,16 @@ CREATE POLICY "Users can update their own appointments"
   ON public.appointments FOR UPDATE
   USING (auth.uid() = user_id);
 
+-- Allow clinic owners to view appointments for their clinic
+CREATE POLICY "Clinic owners can view their clinic appointments"
+  ON public.appointments FOR SELECT
+  USING (
+    clinic_registration_id IN (
+      SELECT id FROM public.clinic_registrations 
+      WHERE email = auth.jwt() ->> 'email' AND status = 'approved'
+    )
+  );
+
 -- Create updated_at trigger
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER
@@ -61,21 +71,50 @@ CREATE TABLE public.clinic_registrations (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
+-- Add clinic_registration_id reference to appointments table to link with clinic_registrations
+ALTER TABLE public.appointments 
+ADD COLUMN IF NOT EXISTS clinic_registration_id UUID REFERENCES public.clinic_registrations(id) ON DELETE SET NULL;
+
+-- Create a view to combine clinics and clinic_registrations for easier querying
+CREATE OR REPLACE VIEW public.all_clinics AS
+SELECT 
+  id,
+  name,
+  category,
+  location,
+  contact_info,
+  map_link,
+  'existing' as source_type,
+  NULL::uuid as registration_id
+FROM public.clinics
+UNION ALL
+SELECT 
+  id,
+  clinic_name as name,
+  category,
+  location,
+  phone as contact_info,
+  website as map_link,
+  'registered' as source_type,
+  id as registration_id
+FROM public.clinic_registrations
+WHERE status = 'approved';
+
 -- Enable RLS on clinic_registrations
 ALTER TABLE public.clinic_registrations ENABLE ROW LEVEL SECURITY;
 
 -- Clinic registrations policies (allow public registration)
-CREATE POLICY "Anyone can view approved clinic registrations"
+CREATE POLICY "Allow public to view approved clinic registrations"
   ON public.clinic_registrations FOR SELECT
   USING (status = 'approved');
 
-CREATE POLICY "Anyone can insert clinic registrations"
+CREATE POLICY "Allow public to insert clinic registrations"
   ON public.clinic_registrations FOR INSERT
   WITH CHECK (true);
 
-CREATE POLICY "Anyone can view their own clinic registrations"
+CREATE POLICY "Allow users to view their own clinic registrations"
   ON public.clinic_registrations FOR SELECT
-  USING (email = auth.jwt() ->> 'email' OR status = 'approved');
+  USING (email = auth.jwt() ->> 'email');
 
 -- Create trigger for clinic_registrations updated_at
 CREATE TRIGGER clinic_registrations_updated_at

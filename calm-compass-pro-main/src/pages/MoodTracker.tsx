@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import MoodTrackingModal from "@/components/MoodTrackingModal";
 import { MoodTrendChart } from "@/components/MoodTrendChart";
+import AIGuidanceModal from "@/components/AIGuidanceModal";
 
 const moodEmojis = [
   { mood: "happy", emoji: "😊", label: "Happy", color: "text-yellow-500" },
@@ -31,6 +32,7 @@ const MoodTracker = () => {
     color: string;
   } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [recentMoods, setRecentMoods] = useState<any[]>([]);
 
   useEffect(() => {
@@ -68,6 +70,10 @@ const MoodTracker = () => {
 
   const handleModalSuccess = () => {
     fetchRecentMoods();
+  };
+
+  const handleAIGuidance = () => {
+    setIsAIModalOpen(true);
   };
 
   return (
@@ -148,8 +154,14 @@ const MoodTracker = () => {
                 onClose={() => setIsModalOpen(false)}
                 selectedMood={selectedMood}
                 onSuccess={handleModalSuccess}
+                onAIGuidance={handleAIGuidance}
               />
             )}
+
+            <AIGuidanceModal 
+              isOpen={isAIModalOpen} 
+              onClose={() => setIsAIModalOpen(false)} 
+            />
           </div>
         </main>
       </div>

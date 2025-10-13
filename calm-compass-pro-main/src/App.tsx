@@ -14,6 +14,9 @@ import ClinicRegistrationStatus from "./pages/ClinicRegistrationStatus";
 import Appointments from "./pages/Appointments";
 import Progress from "./pages/Progress";
 import Emergency from "./pages/Emergency";
+import AIGuidance from "./pages/AIGuidance";
+import ClinicDashboard from "./pages/ClinicDashboard";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +39,9 @@ const App = () => (
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/emergency" element={<Emergency />} />
+          <Route path="/ai-guidance" element={<AIGuidance />} />
+          <Route path="/clinic-dashboard" element={<ClinicDashboard />} />
+          <Route path="/admin" element={<AdminPanel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
